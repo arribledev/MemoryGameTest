@@ -47,10 +47,7 @@ namespace MemoryGame.Controllers
 
         public void StopGame()
         {
-            if (timerCoroutine != null)
-            {
-                StopCoroutine(timerCoroutine);
-            }
+            StopTimer();
             CleanBeforeGameEnd();
         }
 
@@ -115,13 +112,18 @@ namespace MemoryGame.Controllers
             return guessedPairsCount == totalPairsCount;
         }
 
-        private void FinishGame(bool win)
+        private void StopTimer()
         {
-            gameIsActive = false;
             if (timerCoroutine != null)
             {
                 StopCoroutine(timerCoroutine);
             }
+        }
+
+        private void FinishGame(bool win)
+        {
+            gameIsActive = false;
+            StopTimer();
             OnGameFinished?.Invoke(win);
         }
     }
