@@ -81,6 +81,11 @@ namespace MemoryGame.Controllers
 
         private void CleanBeforeGameEnd()
         {
+            if (timerCoroutine != null)
+            {
+                StopCoroutine(timerCoroutine);
+            }
+
             foreach (CardView card in cards)
             {
                 card.OnOpened -= RegisterOpenCard;
@@ -114,10 +119,7 @@ namespace MemoryGame.Controllers
         private void FinishGame(bool win)
         {
             gameIsActive = false;
-            if (timerCoroutine != null)
-            {
-                StopCoroutine(timerCoroutine);
-            }
+            CleanBeforeGameEnd();
             OnGameFinished?.Invoke(win);
         }
     }
