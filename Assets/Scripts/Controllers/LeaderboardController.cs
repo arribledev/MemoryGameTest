@@ -33,12 +33,20 @@ namespace MemoryGame.Views
                 rowIndex++;
             }
 
-            if (rowIndex < LeaderboardRows.Count || LeaderboardRows.Count < maxRowsCount)
+            if (rowIndex >= LeaderboardRows.Count && LeaderboardRows.Count >= maxRowsCount)
             {
-                LeaderboardRow addedLeaderboardRow = new LeaderboardRow { PlayerName = playerName, Score = score };
-                LeaderboardRows.Insert(rowIndex, addedLeaderboardRow);
-                leaderboardTableView.UpdateLeaderboard(LeaderboardRows);
+                return;
             }
+
+            LeaderboardRow addedLeaderboardRow = new LeaderboardRow { PlayerName = playerName, Score = score };
+            LeaderboardRows.Insert(rowIndex, addedLeaderboardRow);
+
+            if (LeaderboardRows.Count > maxRowsCount)
+            {
+                LeaderboardRows.RemoveAt(LeaderboardRows.Count - 1);
+            }
+
+            leaderboardTableView.UpdateLeaderboard(LeaderboardRows);
         }
     }
 }
