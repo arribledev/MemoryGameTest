@@ -24,8 +24,7 @@ public class PairImagesDatabase : ScriptableObject
 
     public enum PairImagesType
     {
-        Dogs,
-        Cats
+        Dogs
     }
 
     [Serializable]

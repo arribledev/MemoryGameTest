@@ -1,4 +1,7 @@
-﻿using System.Collections;
+﻿using MemoryGame.Data;
+using MemoryGame.Views;
+using System.Collections;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -7,30 +10,34 @@ namespace MemoryGame.Controllers
 {
     public class UIController : MonoBehaviour
     {
-        [Header("Canvases")]
+        [Header("Menu")]
         [SerializeField] private GameObject menuCanvas;
-        [SerializeField] private GameObject gameCanvas;
-
-        [Header("Buttons")]
-        [SerializeField] private Button startButton;
-        [SerializeField] private Button restartButton;
-
-        [Header("MenuSettings")]
         [SerializeField] private Slider difficultySlider;
         [SerializeField] private TextMeshProUGUI difficultyText;
         [SerializeField] private TMP_InputField nameInputField;
+        [SerializeField] private Button startButton;
 
         [Header("GUI")]
+        [SerializeField] private GameObject gameCanvas;
         [SerializeField] private TextMeshProUGUI timerText;
         [SerializeField] private TextMeshProUGUI movesCountText;
+        [SerializeField] private Button restartButton;
 
         [Header("Win")]
         [SerializeField] private GameObject winPanel;
         [SerializeField] private float winShowTime;
+        [SerializeField] private TextMeshProUGUI scoreText;
+        [SerializeField] private List<ParticleSystem> fireworks;
 
         [Header("Lose")]
         [SerializeField] private GameObject losePanel;
         [SerializeField] private float loseShowTime;
+
+        [Header("Leaderboard")]
+        [SerializeField] private GameObject leaderboardCanvas;
+        [SerializeField] private LeaderboardController leaderboardController;
+        [SerializeField] private Button leaderboardButton;
+        [SerializeField] private Button goToMenuButton;
 
         [Space]
         [SerializeField] private GameController gameController;
@@ -39,12 +46,15 @@ namespace MemoryGame.Controllers
         {
             startButton.onClick.AddListener(StartGame);
             restartButton.onClick.AddListener(RestartGame);
+            leaderboardButton.onClick.AddListener(OpenLeaderboard);
+            goToMenuButton.onClick.AddListener(CloseLeaderboard);
             difficultySlider.onValueChanged.AddListener(UpdateDifficulty);
-            LoadPlayerName();
 
             gameController.OnGameFinished += ShowGameFinished;
             gameController.OnTimerValueChanged += UpdateTimer;
             gameController.OnMovesCountChanged += UpdateMovesCount;
+
+            LoadData();
         }
 
         private void OnDestroy()
@@ -56,7 +66,6 @@ namespace MemoryGame.Controllers
 
         private void StartGame()
         {
-            SavePlayerName(nameInputField.text);
             gameCanvas.SetActive(true);
             menuCanvas.SetActive(false);
 
@@ -76,6 +85,7 @@ namespace MemoryGame.Controllers
         {
             if (win)
             {
+                leaderboardController.UpdateLeaderboard(nameInputField.text, gameController.Score);
                 StartCoroutine(WinCoroutine());
             }
             else
@@ -86,8 +96,12 @@ namespace MemoryGame.Controllers
 
         private IEnumerator WinCoroutine()
         {
+            scoreText.text = $"{gameController.Score}";
             winPanel.SetActive(true);
-            //fireworks
+            foreach (ParticleSystem firework in fireworks)
+            {
+                firework.Play(true);
+            }
 
             yield return new WaitForSeconds(winShowTime);
 
@@ -124,19 +138,62 @@ namespace MemoryGame.Controllers
             difficultyText.text = $"{difficultyValue}";
         }
         
-        private void LoadPlayerName()
+        private void SetPlayerName(string playerName)
         {
-            string name = SaveController.PlayerName;
-
-            if (SaveController.PlayerName.Length > 0)
+            if (playerName.Length > 0)
             {
-                nameInputField.text = name;
+                nameInputField.text = playerName;
+            }
+        }
+        #endregion
+
+        #region Leaderboard
+        private void OpenLeaderboard()
+        {
+            leaderboardCanvas.SetActive(true);
+            menuCanvas.SetActive(false);
+            gameCanvas.SetActive(false);
+        }
+
+        private void CloseLeaderboard()
+        {
+            menuCanvas.SetActive(true);
+            leaderboardCanvas.SetActive(false);
+        }
+        #endregion
+
+        #region Save
+        private void LoadData()
+        {
+            SaveData data = SaveController.LoadFromJson();
+
+            if (data != null)
+            {
+                SetPlayerName(data.PlayerName);
+                leaderboardController.SetLeaderboardData(data.LeaderboardRows);
             }
         }
 
-        private void SavePlayerName(string name)
+        private void SaveData()
         {
-            SaveController.PlayerName = name;
+            SaveData saveData = new SaveData
+            {
+                PlayerName = nameInputField.text,
+                LeaderboardRows = leaderboardController.LeaderboardRows
+            };
+            SaveController.SaveIntoJson(saveData);
+        }
+        private void OnApplicationPause(bool pause)
+        {
+            if (pause)
+            {
+                SaveData();
+            }
+        }
+
+        private void OnApplicationQuit()
+        {
+            SaveData();
         }
         #endregion
     }

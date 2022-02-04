@@ -16,12 +16,13 @@ namespace MemoryGame.Controllers
         private int secondsLeft;
         private int movesCount;
         private int guessedPairsCount;
-        private bool gameIsActive = false;
         private Coroutine timerCoroutine;
 
         public event Action<bool> OnGameFinished;
         public event Action<int> OnMovesCountChanged;
         public event Action<int> OnTimerValueChanged;
+
+        public int Score { get; private set; }
 
         public void StartGame(int difficulty)
         {
@@ -29,6 +30,7 @@ namespace MemoryGame.Controllers
             secondsLeft = totalPairsCount * secondsPerPair;
             movesCount = 0;
             guessedPairsCount = 0;
+            Score = 0;
             openCard = null;
 
             OnTimerValueChanged?.Invoke(secondsLeft);
@@ -41,7 +43,6 @@ namespace MemoryGame.Controllers
                 card.OnOpened += RegisterOpenCard;
             }
 
-            gameIsActive = true;
             timerCoroutine = StartCoroutine(CountdownCoroutine());
         }
 
@@ -70,6 +71,9 @@ namespace MemoryGame.Controllers
                 openCard = null;
                 return;
             }
+
+            openCard.Highlight();
+            card.Highlight();
 
             openCard = null;
             guessedPairsCount++;
@@ -122,8 +126,15 @@ namespace MemoryGame.Controllers
 
         private void FinishGame(bool win)
         {
-            gameIsActive = false;
             StopTimer();
+
+            if (win)
+            {
+                int movesPenalty = Math.Min(movesCount - 2 * totalPairsCount, 2 * totalPairsCount);
+                int secondsLeftPenalty = Math.Min(secondsPerPair * totalPairsCount - secondsLeft, 2 * totalPairsCount);
+                Score = (6 * totalPairsCount - movesPenalty - secondsLeftPenalty) * 10;
+            }
+
             OnGameFinished?.Invoke(win);
         }
     }

@@ -1,21 +1,28 @@
-﻿using UnityEngine;
+﻿using MemoryGame.Data;
+using Newtonsoft.Json;
+using UnityEngine;
 
 namespace MemoryGame.Controllers
 {
-    public static class SaveController
+    public class SaveController
     {
-        private static string playerNameKey = "playerName";
-        public static string PlayerName
+        private static string saveDataPath = "/SaveData.json";
+
+        public static SaveData LoadFromJson()
         {
-            get
-            {
-                return PlayerPrefs.GetString("playerNameKey", "");
+            if (!System.IO.File.Exists(Application.persistentDataPath + saveDataPath))
+            { 
+                return null;
             }
 
-            set
-            {
-                PlayerPrefs.SetString("playerNameKey", value);
-            }
+            string stringData = System.IO.File.ReadAllText(Application.persistentDataPath + saveDataPath);
+            return JsonConvert.DeserializeObject<SaveData>(stringData);
+        }
+
+        public static void SaveIntoJson(SaveData data)
+        {
+            string stringData = JsonConvert.SerializeObject(data);
+            System.IO.File.WriteAllText(Application.persistentDataPath + saveDataPath, stringData);
         }
     }
 }

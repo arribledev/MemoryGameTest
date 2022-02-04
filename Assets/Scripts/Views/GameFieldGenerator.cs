@@ -74,9 +74,8 @@ namespace MemoryGame.Views
             {
                 for (int j = 0; j < cardsCountInRow; j++)
                 {
-                    RectTransform cardRectTransform = cards[cardIndex].GetComponent<RectTransform>();
-                    cardRectTransform.sizeDelta = cardSizeVector;
-                    cardRectTransform.anchoredPosition = cardPosition;
+                    cards[cardIndex].Resize(cardSizeVector);
+                    cards[cardIndex].RectTransform.anchoredPosition = cardPosition;
 
                     cardPosition.x += cardSize + spacing;
                     cardIndex++;
@@ -89,9 +88,8 @@ namespace MemoryGame.Views
             cardPosition.x = -(cardsLeftCount / 2f - 0.5f) * (cardSize + spacing);
             for (int i = 0; i < cardsLeftCount; i++)
             {
-                RectTransform cardRectTransform = cards[cardIndex].GetComponent<RectTransform>();
-                cardRectTransform.sizeDelta = cardSizeVector;
-                cardRectTransform.anchoredPosition = cardPosition;
+                cards[cardIndex].Resize(cardSizeVector);
+                cards[cardIndex].RectTransform.anchoredPosition = cardPosition;
 
                 cardPosition.x += cardSize + spacing;
                 cardIndex++;
