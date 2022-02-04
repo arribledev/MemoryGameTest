@@ -51,6 +51,11 @@ namespace MemoryGame.Views
                 spacing = 10;
             }
 
+            if (gameField.rect.width > gameField.rect.height)
+            {
+                gameField.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, gameField.rect.height);
+            }
+
             int cardsCountInRow = (int)Math.Ceiling(Math.Sqrt(cards.Length));
             int cardsCountInStraightColumn = cards.Length / cardsCountInRow;
             int cardsLeftCount = cards.Length % cardsCountInRow;
@@ -71,7 +76,7 @@ namespace MemoryGame.Views
                 {
                     RectTransform cardRectTransform = cards[cardIndex].GetComponent<RectTransform>();
                     cardRectTransform.sizeDelta = cardSizeVector;
-                    cardRectTransform.position += cardPosition;
+                    cardRectTransform.anchoredPosition = cardPosition;
 
                     cardPosition.x += cardSize + spacing;
                     cardIndex++;
@@ -86,7 +91,7 @@ namespace MemoryGame.Views
             {
                 RectTransform cardRectTransform = cards[cardIndex].GetComponent<RectTransform>();
                 cardRectTransform.sizeDelta = cardSizeVector;
-                cardRectTransform.position += cardPosition;
+                cardRectTransform.anchoredPosition = cardPosition;
 
                 cardPosition.x += cardSize + spacing;
                 cardIndex++;
