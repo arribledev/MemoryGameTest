@@ -17,6 +17,7 @@ namespace MemoryGame.Controllers
         private int movesCount;
         private int guessedPairsCount;
         private bool gameIsActive = false;
+        private Coroutine timerCoroutine;
 
         public event Action<bool> OnGameFinished;
         public event Action<int> OnMovesCountChanged;
@@ -41,7 +42,7 @@ namespace MemoryGame.Controllers
             }
 
             gameIsActive = true;
-            StartCoroutine(CountdownCoroutine());
+            timerCoroutine = StartCoroutine(CountdownCoroutine());
         }
 
         public void StopGame()
@@ -89,23 +90,15 @@ namespace MemoryGame.Controllers
 
         private IEnumerator CountdownCoroutine()
         {
-            while (secondsLeft > 0 && gameIsActive)
+            while (secondsLeft > 0)
             {
                 yield return new WaitForSeconds(1);
-
-                if (!gameIsActive)
-                {
-                    break;
-                }
 
                 secondsLeft--;
                 OnTimerValueChanged?.Invoke(secondsLeft);
             }
 
-            if (gameIsActive)
-            {
-                RegisterTimerStop();
-            }
+            RegisterTimerStop();
         }
 
         private void RegisterTimerStop()
@@ -121,6 +114,10 @@ namespace MemoryGame.Controllers
         private void FinishGame(bool win)
         {
             gameIsActive = false;
+            if (timerCoroutine != null)
+            {
+                StopCoroutine(timerCoroutine);
+            }
             OnGameFinished?.Invoke(win);
         }
     }
